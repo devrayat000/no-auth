@@ -1,0 +1,2 @@
+-- AddForeignKey
+ALTER TABLE "LocalUser" ADD CONSTRAINT "LocalUser_id_fkey" FOREIGN KEY ("id") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
