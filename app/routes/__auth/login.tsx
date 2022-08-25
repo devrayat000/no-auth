@@ -35,9 +35,8 @@ type ActionData = LoginValidationError & { authError?: string };
 
 export async function action({ request }: ActionArgs) {
   const formData = await request.formData();
-  const params = Object.fromEntries(formData.entries());
 
-  const validated = validateLogin(params);
+  const validated = validateLogin(formData);
   if (!validated.success) {
     return validated;
   }

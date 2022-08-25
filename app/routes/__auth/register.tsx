@@ -34,9 +34,8 @@ type ActionData = RegisterValidationError & { authError?: string };
 
 export async function action({ request }: ActionArgs) {
   const formData = await request.formData();
-  const params = Object.fromEntries(formData.entries());
 
-  const validated = validateRegister(params);
+  const validated = validateRegister(formData);
   if (!validated.success) {
     return validated;
   }

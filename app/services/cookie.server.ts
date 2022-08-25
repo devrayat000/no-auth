@@ -50,6 +50,14 @@ export async function getUserId(request: Request) {
   return userId;
 }
 
+export function unauthorized(redirectTo?: string) {
+  if (redirectTo) {
+    const searchParams = new URLSearchParams([["_next", redirectTo]]);
+    return redirect(`/login?${searchParams}`, { status: 401 });
+  }
+  return redirect(`/login`, { status: 401 });
+}
+
 export async function requireUserId(
   request: Request,
   redirectTo: string = new URL(request.url).pathname
@@ -57,8 +65,7 @@ export async function requireUserId(
   const session = await getUserSession(request);
   const userId = session.get("userId");
   if (!userId || typeof userId !== "string") {
-    const searchParams = new URLSearchParams([["_next", redirectTo]]);
-    throw redirect(`/login?${searchParams}`);
+    throw unauthorized(redirectTo);
   }
   return userId;
 }

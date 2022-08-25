@@ -1,4 +1,5 @@
 import { Global, MantineProvider } from "@mantine/core";
+import { StylesPlaceholder } from "@mantine/remix";
 import type { MetaFunction } from "@remix-run/node";
 import {
   Links,
@@ -17,18 +18,19 @@ export const meta: MetaFunction = () => ({
 
 export default function App() {
   return (
-    <html lang="en">
-      <head>
-        <Meta />
-        <Links />
-      </head>
-      <body>
-        <MantineProvider
-          withGlobalStyles
-          withNormalizeCSS
-          withCSSVariables
-          theme={{ colorScheme: "light", primaryColor: "cyan" }}
-        >
+    <MantineProvider
+      withGlobalStyles
+      withNormalizeCSS
+      withCSSVariables
+      theme={{ colorScheme: "light", primaryColor: "cyan" }}
+    >
+      <html lang="en">
+        <head>
+          <Meta />
+          <Links />
+          <StylesPlaceholder />
+        </head>
+        <body>
           <Global
             styles={{
               fieldset: {
@@ -39,11 +41,11 @@ export default function App() {
             }}
           />
           <Outlet />
-        </MantineProvider>
-        <ScrollRestoration />
-        <Scripts />
-        <LiveReload />
-      </body>
-    </html>
+          <ScrollRestoration />
+          <Scripts />
+          <LiveReload />
+        </body>
+      </html>
+    </MantineProvider>
   );
 }

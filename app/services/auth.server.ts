@@ -1,7 +1,7 @@
 import { redirect } from "@remix-run/node";
 
 import { db } from "~/modules/db.server";
-import { getUserId, getUserSession, storage } from "./cookie.server";
+import { getUserSession, storage, unauthorized } from "./cookie.server";
 
 type LoginForm = {
   email: string;
@@ -43,20 +43,16 @@ export async function login({ email }: LoginForm) {
   return user;
 }
 
-export async function getUser(request: Request) {
-  const userId = await getUserId(request);
-  if (typeof userId !== "string") {
-    return null;
-  }
-
+export async function getUser(userId: string) {
   try {
     const user = await db.localUser.findUnique({
       where: { id: userId },
       select: { id: true, email: true },
     });
     return user;
-  } catch {
-    throw logout(request);
+  } catch (error) {
+    console.log(error);
+    throw unauthorized();
   }
 }
 
