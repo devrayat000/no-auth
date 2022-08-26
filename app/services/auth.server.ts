@@ -20,34 +20,63 @@ export async function register({
   hash,
   salt,
 }: RegistrationForm) {
-  const user = await db.localUser.create({
-    data: {
-      email,
-      username,
-      hash,
-      salt,
-      user: { create: {} },
-    },
-    select: { id: true },
+  const account = await db.$transaction(async (prisma) => {
+    const account = await db.account.create({
+      data: {
+        providerAccountId: "",
+        user: {
+          create: {
+            email,
+            username,
+            hash,
+            salt,
+          },
+        },
+      },
+      select: { id: true, user: { select: { id: true } } },
+    });
+    await prisma.account.update({
+      where: { id: account.id },
+      data: { providerAccountId: account.user?.id },
+    });
+    return account;
   });
-  return { id: user.id, email };
+
+  return { id: account.id, email };
 }
 
 export async function login({ email }: LoginForm) {
-  const user = await db.localUser.findUnique({
-    where: { email },
-    select: { id: true, hash: true },
+  const account = await db.account.findFirst({
+    where: {
+      user: {
+        email,
+      },
+    },
+    select: {
+      id: true,
+      user: {
+        select: {
+          email: true,
+          hash: true,
+        },
+      },
+    },
   });
-  if (!user) return { authError: "User not found!" } as const;
+  if (!account) return { authError: "User not found!" };
 
-  return user;
+  return account;
 }
 
 export async function getUser(userId: string) {
   try {
-    const user = await db.localUser.findUnique({
+    const user = await db.account.findUniqueOrThrow({
       where: { id: userId },
-      select: { id: true, email: true },
+      select: {
+        id: true,
+        user: {
+          select: { id: true },
+        },
+      },
     });
     return user;
   } catch (error) {

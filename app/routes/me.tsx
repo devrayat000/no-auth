@@ -1,31 +1,38 @@
-import { Outlet, useLoaderData } from "@remix-run/react";
+import { Form, useLoaderData } from "@remix-run/react";
 import {
+  AuthenticityTokenInput,
   AuthenticityTokenProvider,
   createAuthenticityToken,
 } from "remix-utils";
 import type { LoaderArgs } from "@remix-run/node";
+import { Container } from "@mantine/core";
 
 import { getUserSession, requireUserId } from "~/services/cookie.server";
 import { getFullUser } from "~/services/user.server";
+import EditableField from "~/components/EditableField";
 
 export async function loader({ request }: LoaderArgs) {
-  console.log("session");
   const session = await getUserSession(request);
   const id = await requireUserId(request);
-  const user = await getFullUser(id);
+  const account = await getFullUser(id);
 
   return {
-    user,
+    account,
     csrf: createAuthenticityToken(session, "csrfToken"),
   };
 }
 
 export default function ProfileRoot() {
-  const { user, csrf } = useLoaderData<typeof loader>();
+  const { account, csrf } = useLoaderData<typeof loader>();
 
   return (
-    <AuthenticityTokenProvider token={csrf}>
-      <Outlet context={user} />
-    </AuthenticityTokenProvider>
+    <Container>
+      <AuthenticityTokenProvider token={csrf}>
+        <Form>
+          <AuthenticityTokenInput />
+          <EditableField label="Name" defaultValue={account.user?.username} />
+        </Form>
+      </AuthenticityTokenProvider>
+    </Container>
   );
 }

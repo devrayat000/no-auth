@@ -41,17 +41,20 @@ export async function action({ request }: ActionArgs) {
     return validated;
   }
   const { email, password, rememberMe } = validated.data;
-  const user = await login({ email });
-  if ("authError" in user) {
-    return user;
+  const account = await login({ email });
+  if ("authError" in account) {
+    return account;
   }
 
-  const isPasswordCorrect = await validatePassword(password, user.hash);
+  const isPasswordCorrect = await validatePassword(
+    password,
+    account.user?.hash!
+  );
   if (!isPasswordCorrect) {
     return { authError: "Password invalid!" };
   }
 
-  return createUserSession(user.id, "/", rememberMe === "on");
+  return createUserSession(account.id, "/", rememberMe === "on");
 }
 
 export default function LoginPage() {

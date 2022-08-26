@@ -18,8 +18,9 @@ export const storage = createCookieSessionStorage({
     secrets: [sessionSecret],
     sameSite: "strict",
     path: "/",
-    maxAge: 60 * 60 * 24 * 30,
+    // maxAge: 60 * 60 * 24 * 30,
     httpOnly: true,
+    isSigned: process.env.NODE_ENV === "production",
   },
 });
 
@@ -37,7 +38,7 @@ export async function createUserSession(
   return redirect(redirectTo, {
     headers: {
       "Set-Cookie": await storage.commitSession(session, {
-        maxAge: remember ? 86400 : 0,
+        maxAge: remember ? 7 * 864_000 : undefined,
       }),
     },
   });
@@ -53,9 +54,9 @@ export async function getUserId(request: Request) {
 export function unauthorized(redirectTo?: string) {
   if (redirectTo) {
     const searchParams = new URLSearchParams([["_next", redirectTo]]);
-    return redirect(`/login?${searchParams}`, { status: 401 });
+    return redirect(`/login?${searchParams}`);
   }
-  return redirect(`/login`, { status: 401 });
+  return redirect(`/login`);
 }
 
 export async function requireUserId(
